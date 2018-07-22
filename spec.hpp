@@ -7,6 +7,21 @@ using VVVI = vector<VVI>;
 int R;
 VVVI model;
 
+void print2D(int y) {
+  cout << "y: " << y << endl;
+  for (int i = 0; i < R; i++) {
+    for (int j = 0; j < R; j++) {
+      if (model[i][y][j]) {
+        cout << '#';
+      } else {
+        cout << '.';
+      }
+    }
+    cout << endl;
+  }
+  cout << endl;
+}
+
 string halt_s() {
   return "11111111";
 }
@@ -163,10 +178,14 @@ void read_binary() {
   fread(c, sizeof(uint8_t), int(ceil(R * R * R / 8.0)), fp);
   fclose(fp);
   for (int i = 0; i < int(ceil(R * R * R / 8.0)); i++) {
-    bin += '0' + ((c[i] >> 3) & 1);
-    bin += '0' + ((c[i] >> 2) & 1);
-    bin += '0' + ((c[i] >> 1) & 1);
     bin += '0' + (c[i] & 1);
+    bin += '0' + ((c[i] >> 1) & 1);
+    bin += '0' + ((c[i] >> 2) & 1);
+    bin += '0' + ((c[i] >> 3) & 1);
+    bin += '0' + ((c[i] >> 4) & 1);
+    bin += '0' + ((c[i] >> 5) & 1);
+    bin += '0' + ((c[i] >> 6) & 1);
+    bin += '0' + ((c[i] >> 7) & 1);
   }
   for (int i = 0; i < R; i++) {
     for (int j = 0; j < R; j++) {
