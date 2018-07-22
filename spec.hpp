@@ -120,6 +120,17 @@ string fill_s(VI v) {
   return len + "011";
 }
 
+string void_s(VI v) {
+  int dist = (v[0] + 1) * 9 + (v[1] + 1) * 3 + (v[2] + 1);
+  string len = "";
+  len += '0' + ((dist >> 4) & 1);
+  len += '0' + ((dist >> 3) & 1);
+  len += '0' + ((dist >> 2) & 1);
+  len += '0' + ((dist >> 1) & 1);
+  len += '0' + (dist & 1);
+  return len + "010";
+}
+
 void assert_commands() {
   assert(smove_s({12,0,0}) == "0001010000011011");
   assert(smove_s({0,0,-4}) == "0011010000001011");
@@ -129,6 +140,7 @@ void assert_commands() {
   assert(fusions_s({1,-1,0}) == "10011110");
   assert(fission_s({0,0,1}, 5) == "0111010100000101");
   assert(fill_s({0,-1,0}) == "01010011");
+  assert(void_s({1,0,1}) == "10111010");
 }
 
 void read_binary() {
@@ -146,9 +158,9 @@ void read_binary() {
   R = int(r);
   model = VVVI(R, VVI(R, VI(R)));
   string bin = "";
-  char c[2000000];
+  uint8_t c[2000000];
   assert(ceil(R * R * R / 8.0) < 2000000);
-  fread(c, sizeof(char), int(ceil(R * R * R / 8.0)), fp);
+  fread(c, sizeof(uint8_t), int(ceil(R * R * R / 8.0)), fp);
   fclose(fp);
   for (int i = 0; i < int(ceil(R * R * R / 8.0)); i++) {
     bin += '0' + ((c[i] >> 3) & 1);
@@ -164,4 +176,32 @@ void read_binary() {
     }
   }
   cout << "Model successfully imported" << endl;
+}
+
+void write_binary(string cmd) {
+  cout << "Trace file name?" << endl;
+  string s;
+  cin >> s;
+  FILE *fp;
+  if ((fp = fopen(s.c_str(), "wb")) == NULL) {
+    cerr << "Failed to open file" << endl;
+    exit(1);
+  }
+  assert(cmd.size() % 8 == 0);
+  uint8_t c[2000000];
+  assert(cmd.size() / 8 < 2000000);
+  for (int i = 0; i < cmd.size(); i+=8) {
+    uint8_t e = 0;
+    e += 128 * (cmd[i] == '1');
+    e += 64 * (cmd[i + 1] == '1');
+    e += 32 * (cmd[i + 2] == '1');
+    e += 16 * (cmd[i + 3] == '1');
+    e += 8 * (cmd[i + 4] == '1');
+    e += 4 * (cmd[i + 5] == '1');
+    e += 2 * (cmd[i + 6] == '1');
+    e += cmd[i + 7] == '1';
+    c[i / 8] = e;
+  }
+  fwrite(c, sizeof(uint8_t), cmd.size() / 8, fp);
+  fclose(fp);
 }
