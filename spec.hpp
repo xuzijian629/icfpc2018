@@ -22,6 +22,93 @@ void print2D(int y) {
   cout << endl;
 }
 
+int id(int x, int y, int z) {
+  return x * R * R + y * R + z;
+}
+
+VI xyz(int id) {
+  int x = id / (R * R);
+  int y = (id % (R * R)) / R;
+  int z = id % R;
+  return {x, y, z};
+}
+
+VI diffs[6] = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
+
+VI get_pillar() {
+  using P = pair<int, int>;
+  using VP = vector<P>;
+  using VVP = vector<VP>;
+  using VVVP = vector<VVP>;
+  VVVP memo = VVVP(R, VVP(R, VP(R, P(1000, -1))));
+  queue<int> q;
+  for (int x = 0; x < R; x++) {
+    for (int z = 0; z < R; z++) {
+      if (model[x][0][z]) {
+        memo[x][0][z] = P(1, -1);
+        q.push(id(x, 0, z));
+      }
+    }
+  }
+  while (!q.empty()) {
+    int i = q.front();
+    VI c = xyz(i);
+    q.pop();
+    int from_v = memo[c[0]][c[1]][c[2]].first;
+    for (VI d: diffs) {
+      if (0 < c[0] + d[0] && c[0] + d[0] < R && 0 <= c[1] + d[1] && c[1] + d[1] < R && 0 < c[2] + d[2] && c[2] + d[2] < R) {
+        int to_v = memo[c[0] + d[0]][c[1] + d[1]][c[2] + d[2]].first;
+        if (model[c[0] + d[0]][c[1] + d[1]][c[2] + d[2]] && to_v > from_v) {
+          memo[c[0] + d[0]][c[1] + d[1]][c[2] + d[2]] = P(from_v + 1, i);
+          q.push(id(c[0] + d[0], c[1] + d[1], c[2] + d[2]));
+        }
+      } else {
+        continue;
+      }
+    }
+  }
+
+  int y, dist, x, z;
+  for (y = R - 1; y >= 0; y--) {
+    dist = 1000, x = 1000, z = 1000;
+    for (int i = 0; i < R; i++) {
+      for (int j = 0; j < R; j++) {
+        if (memo[i][y][j].first != 1000 && memo[i][y][j].first <= dist) {
+          if (memo[i][y][j].first < dist) {
+            x = i;
+            z = j;
+          } else {
+            if (i + j < x + z) {
+              x = i;
+              z = j;
+            }
+          }
+          dist = memo[i][y][j].first;
+        }
+      }
+    }
+    if (dist != 1000) {
+      break;
+    }
+  }
+
+  VI ret;
+  while (1) {
+    assert(model[x][y][z]);
+    ret.push_back(id(x, y, z));
+    if (memo[x][y][z].second == -1) {
+      break;
+    }
+    int prev = memo[x][y][z].second;
+    VI c = xyz(prev);
+    x = c[0];
+    y = c[1];
+    z = c[2];
+  }
+
+  return ret;
+}
+
 string halt_s() {
   return "11111111";
 }
@@ -158,10 +245,7 @@ void assert_commands() {
   assert(void_s({1,0,1}) == "10111010");
 }
 
-void read_binary() {
-  cout << "Model file name?" << endl;
-  string s;
-  cin >> s;
+void read_binary(string s) {
   FILE *fp;
   if ((fp = fopen(s.c_str(), "rb")) == NULL) {
     cerr << "Failed to open file" << endl;
@@ -195,6 +279,13 @@ void read_binary() {
     }
   }
   cout << "Model successfully imported" << endl;
+}
+
+void read_binary() {
+  cout << "Model file name?" << endl;
+  string s;
+  cin >> s;
+  read_binary(s);
 }
 
 void write_binary(string cmd) {
