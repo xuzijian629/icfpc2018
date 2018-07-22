@@ -6,7 +6,10 @@ DEPS= $(wildcard *.d)
 TARGET= main
 
 -include $(DEPS)
-.PHONY:clean all run
+.PHONY:clean all run default
+
+default:$(TARGET)
+
 
 run:$(TARGET)
 	./$(TARGET)
