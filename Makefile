@@ -1,4 +1,4 @@
-girigiri: main.cpp
+girigiri: spec.hpp main.cpp
 	g++ -O2 -o main main.cpp
 clean:
 	rm -f main
