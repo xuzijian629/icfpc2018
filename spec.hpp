@@ -263,7 +263,7 @@ void read_binary(string s) {
       }
     }
   }
-  cout << "Model successfully imported (" << s << ")" << endl;
+  cout << "Model successfully imported" << endl;
 }
 
 void read_binary() {

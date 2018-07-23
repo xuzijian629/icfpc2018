@@ -3,12 +3,11 @@
 string cmd = "";
 bool is_high = false;
 
-int main(int argc, char *argv[]) {
+int main() {
   assert_commands();
+  read_binary();
   // read_binary("tmp.mdl");
-  string model_name(argv[1]);
-  read_binary(model_name);
-  /* read_binary("mdl/FA120_tgt.mdl"); */
+  // read_binary("mdl/FA120_tgt.mdl");
 
   VI curpos = {0, 0, 0};
   for (int y = 0; y <= max_y; y++) {
@@ -81,7 +80,6 @@ int main(int argc, char *argv[]) {
   }
   cmd += halt_s();
 
-  string nbt_name = "./mynbt/" + model_name.substr(6, 5) + ".nbt";
-  cout << nbt_name << " saved!" << endl;
-  write_binary(nbt_name, cmd);
+  write_binary(cmd);
+  // write_binary("tmp.nbt", cmd);
 }
