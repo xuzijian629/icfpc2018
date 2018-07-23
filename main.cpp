@@ -6,7 +6,7 @@ bool is_high = false;
 int main() {
   assert_commands();
   // read_binary("tmp.mdl");
-  read_binary("mdl/FA170_tgt.mdl");
+  read_binary("mdl/FA120_tgt.mdl");
 
   VI curpos = {0, 0, 0};
   for (int y = 0; y <= max_y; y++) {
@@ -30,23 +30,24 @@ int main() {
     int zoff_max = max_z - min_z;
     while (zoff <= zoff_max) {
       if (model[startpos[0] + xoff][y][startpos[2] + zoff]) {
-        if (!is_high && ungrounded(startpos[0] + xoff, y, startpos[2] + zoff)) {
+        bool u = ungrounded(startpos[0] + xoff, y, startpos[2] + zoff);
+        if (!is_high && u) {
           cmd += flip_s();
           cmd += fill_s({0, -1, 0});
           model[startpos[0] + xoff][y][startpos[2] + zoff] = 2;
           is_high = true;
         }
-        if (is_high && ungrounded(startpos[0] + xoff, y, startpos[2] + zoff)) {
+        if (is_high && u) {
           cmd += fill_s({0, -1, 0});
           model[startpos[0] + xoff][y][startpos[2] + zoff] = 2;
         }
-        if (is_high && !ungrounded(startpos[0] + xoff, y, startpos[2] + zoff)) {
+        if (is_high && !u) {
           cmd += fill_s({0, -1, 0});
           cmd += flip_s();
           model[startpos[0] + xoff][y][startpos[2] + zoff] = 2;
           is_high = false;
         }
-        if (!is_high && !ungrounded(startpos[0] + xoff, y, startpos[2] + zoff)) {
+        if (!is_high && !u) {
           cmd += fill_s({0, -1, 0});
           model[startpos[0] + xoff][y][startpos[2] + zoff] = 2;
         }

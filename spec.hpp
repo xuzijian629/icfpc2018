@@ -7,7 +7,7 @@ using VVVI = vector<VVI>;
 int R;
 VVVI model;
 VI par;
-VI floats;
+int floats;
 
 int id(int x, int y, int z) {
   return x * R * R + y * R + z;
@@ -306,6 +306,7 @@ void write_binary(string cmd) {
 }
 
 int find(int x) {
+  if (x == -1) return -1;
   if (par[x] == -1) return -1;
   if (par[x] == x) return x;
   return par[x] = find(par[x]);
@@ -317,37 +318,43 @@ void unite(int x, int y) {
   if (x != y) {
     if (x == -1) {
       par[y] = -1;
+      floats--;
       return;
     }
     if (y == -1) {
       par[x] = -1;
+      floats--;
       return;
     }
     par[x] = y;
+    floats--;
   }
 }
 
 bool ungrounded(int x, int y, int z) {
   if (y == 0) return false;
+  int v = id(x, y, z);
   VI d[6] = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
+  map<int, int> parv;
   for (int i = 0; i < 6; i++) {
     int nx = x + d[i][0];
     int ny = y + d[i][1];
     int nz = z + d[i][2];
     if (model[nx][ny][nz] == 2) {
-      unite(id(x, y, z), id(nx, ny, nz));
+      parv[par[id(nx, ny, nz)]]++;
     }
   }
-  if (find(id(x, y, z)) == -1) {
-    if (floats.size()) {
-      for (int i: floats) {
-        find(i);
-      }
-      floats.clear();
-    }
-    return false;
+  if (parv.size() == 0) {
+    floats++;
+    return true;
   }
 
-  floats.push_back(id(x, y, z));
-  return true;
+  int front = (*parv.begin()).first;
+  par[v] = front;
+  for (auto p: parv) {
+    unite(p.first, front);
+  }
+
+  assert (floats >= 0);
+  return floats != 0;
 }
