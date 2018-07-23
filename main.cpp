@@ -72,6 +72,7 @@ int main() {
       }
     }
     cmd += move_from_to(curpos, {min_x, y + 1, min_z});
+    curpos = {min_x, y + 1, min_z};
     VI startpos = {min_x, y + 1, min_z};
     int xoff = 0;
     int zoff = 0;
@@ -79,6 +80,9 @@ int main() {
     int zoff_max = max_z - min_z;
     while (zoff <= zoff_max) {
       if (model[startpos[0] + xoff][y][startpos[2] + zoff]) {
+        cmd += long_move_s(curpos[0], startpos[0] + xoff, x_axis);
+        cmd += long_move_s(curpos[2], startpos[2] + zoff, z_axis);
+        curpos = {startpos[0] + xoff, y + 1, startpos[2] + zoff};
         if (!is_high && query_ans[ind]) {
           cmd += void_s({0, -1, 0});
         }
@@ -100,27 +104,22 @@ int main() {
       if (zoff % 2 == 0) {
         if (xoff < xoff_max) {
           xoff++;
-          cmd += smove_s({1, 0, 0});
         } else {
           zoff++;
-          cmd += smove_s({0, 0, 1});
         }
       } else {
         if (xoff > 0) {
           xoff--;
-          cmd += smove_s({-1, 0, 0});
         } else {
           zoff++;
-          cmd += smove_s({0, 0, 1});
         }
       }
     }
     if (y == 0) {
-      cmd += move_from_to({startpos[0] + xoff, y + 1, startpos[2] + zoff}, {0, 0, 0});
+      cmd += move_from_to(curpos, {0, 0, 0});
+      curpos = {0, 0, 0};
       break;
     }
-    cmd += smove_s({0, -1, 0});
-    curpos = {startpos[0] + xoff, y, startpos[2] + zoff};
   }
   cmd += halt_s();
 
