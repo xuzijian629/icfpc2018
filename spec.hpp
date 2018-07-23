@@ -97,36 +97,36 @@ string move_from_to(int dx, int dy, int dz) {
   if (!(dx || dy || dz)) return "";
   int fdx = 0, fdy = 0, fdz = 0;
   if (dx > 15) {
-    dx = 15;
     fdx = dx - 15;
+    dx = 15;
   }
   if (dx < -15) {
-    dx = -15;
     fdx = dx + 15;
+    dx = -15;
   }
   if (dx) {
     return smove_s({dx, 0, 0}) + move_from_to(fdx, dy, dz);
   }
 
   if (dy > 15) {
-    dy = 15;
     fdy = dy - 15;
+    dy = 15;
   }
   if (dy < -15) {
-    dy = -15;
     fdy = dy + 15;
+    dy = -15;
   }
   if (dy) {
     return smove_s({0, dy, 0}) + move_from_to(dx, fdy, dz);
   }
 
   if (dz > 15) {
-    dz = 15;
     fdz = dz - 15;
+    dz = 15;
   }
   if (dz < -15) {
-    dz = -15;
     fdz = dz + 15;
+    dz = -15;
   }
   if (dz) {
     return smove_s({0, 0, dz}) + move_from_to(dx, dy, fdz);
@@ -315,8 +315,14 @@ void unite(int x, int y) {
   x = find(x);
   y = find(y);
   if (x != y) {
-    if (x == -1) par[y] = -1;
-    if (y == -1) par[x] = -1;
+    if (x == -1) {
+      par[y] = -1;
+      return;
+    }
+    if (y == -1) {
+      par[x] = -1;
+      return;
+    }
     par[x] = y;
   }
 }

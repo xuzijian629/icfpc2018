@@ -6,7 +6,7 @@ bool is_high = false;
 int main() {
   assert_commands();
   // read_binary("tmp.mdl");
-  read_binary("mdl/FA150_tgt.mdl");
+  read_binary("mdl/FA170_tgt.mdl");
 
   VI curpos = {0, 0, 0};
   for (int y = 0; y <= max_y; y++) {
