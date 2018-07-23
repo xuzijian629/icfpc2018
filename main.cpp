@@ -84,6 +84,7 @@ int main() {
       if (model[startpos[0] + xoff][y][startpos[2] + zoff]) {
         cmd += long_move_s(curpos[0], startpos[0] + xoff, x_axis);
         cmd += long_move_s(curpos[2], startpos[2] + zoff, z_axis);
+        cmd += long_move_s(curpos[1], y + 1, y_axis);
         curpos = {startpos[0] + xoff, y + 1, startpos[2] + zoff};
         if (!is_high && query_ans[ind]) {
           cmd += void_s({0, -1, 0});
@@ -157,6 +158,7 @@ int main() {
       if (model[startpos[0] + xoff][y][startpos[2] + zoff]) {
         cmd += long_move_s(curpos[0], startpos[0] + xoff, x_axis);
         cmd += long_move_s(curpos[2], startpos[2] + zoff, z_axis);
+        cmd += long_move_s(curpos[1], y + 1, y_axis);
         curpos = {startpos[0] + xoff, y + 1, startpos[2] + zoff};
         bool u = ungrounded(startpos[0] + xoff, y, startpos[2] + zoff);
         if (!is_high && u) {
