@@ -9,7 +9,7 @@ VVVI model;
 VI query;
 VI query_ans;
 VI par;
-VI floats;
+int floats;
 
 int id(int x, int y, int z) {
   return x * R * R + y * R + z;
@@ -312,6 +312,7 @@ void write_binary(string cmd) {
 }
 
 int find(int x) {
+  if (x == -1) return -1;
   if (par[x] == -1) return -1;
   if (par[x] == x) return x;
   return par[x] = find(par[x]);
@@ -323,38 +324,17 @@ void unite(int x, int y) {
   if (x != y) {
     if (x == -1) {
       par[y] = -1;
+      floats--;
       return;
     }
     if (y == -1) {
       par[x] = -1;
+      floats--;
       return;
     }
     par[x] = y;
+    floats--;
   }
-}
-
-bool ungrounded(int x, int y, int z) {
-  if (y == 0) return false;
-  queue<VI> q;
-  q.push({x, y, z});
-  VI d[6] = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
-  VVVI visited = VVVI(R, VVI(R, VI(R)));
-  visited[x][y][z] = 1;
-  while (!q.empty()) {
-    VI c = q.front();
-    q.pop();
-    for (int i = 0; i < 6; i++) {
-      int nx = c[0] + d[i][0];
-      int ny = c[1] + d[i][1];
-      int nz = c[2] + d[i][2];
-      if (!visited[nx][ny][nz] && model[nx][ny][nz] == 2) {
-        if (ny == 0) return false;
-        q.push({nx, ny, nz});
-        visited[nx][ny][nz] = 1;
-      }
-    }
-  }
-  return true;
 }
 
 void solve_query() {
@@ -372,28 +352,26 @@ void solve_query() {
       continue;
     }
 
+    map<int, int> parv;
     for (int j = 0; j < 6; j++) {
       int nx = c[0] + d[j][0];
       int ny = c[1] + d[j][1];
       int nz = c[2] + d[j][2];
       if (visited[id(nx, ny, nz)]) {
-        unite(v, id(nx, ny, nz));
+        parv[par[id(nx, ny, nz)]]++;
       }
     }
-    if (find(v) == -1) {
-      if (floats.size()) {
-        query_ans[i] = false;
-        for (int i: floats) {
-          find(i);
-        }
-        floats.clear();
-        continue;
-      }
-      query_ans[i] = true;
+    if (parv.size() == 0) {
+      query_ans[i] = floats == 0;
+      floats++;
       continue;
     }
 
-    floats.push_back(v);
-    query_ans[i] = false;
+    query_ans[i] = floats == 0;
+    int front = (*parv.begin()).first;
+    par[v] = front;
+    for (auto p: parv) {
+      unite(p.first, front);
+    }
   }
 }

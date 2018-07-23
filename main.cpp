@@ -5,6 +5,7 @@ bool is_high = false;
 
 int main() {
   assert_commands();
+  // read_binary("tmp.mdl");
   read_binary("mdl/FD120_src.mdl");
 
   VI curpos = {0, max_y + 1, 0};
