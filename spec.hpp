@@ -6,6 +6,12 @@ using VVVI = vector<VVI>;
 
 int R;
 VVVI model;
+VI par;
+VI floats;
+
+int id(int x, int y, int z) {
+  return x * R * R + y * R + z;
+}
 
 void print2D(int y) {
   cout << "y: " << y << endl;
@@ -224,6 +230,10 @@ void read_binary(string s) {
   uint8_t r;
   fread(&r, sizeof(uint8_t), 1, fp);
   R = int(r);
+  par = VI(R * R * R);
+  for (int i = 0; i < R * R * R; i++) {
+    par[i] = i;
+  }
   model = VVVI(R, VVI(R, VI(R)));
   string bin = "";
   uint8_t c[2000000];
@@ -246,6 +256,9 @@ void read_binary(string s) {
         model[i][j][k] = bin[i * R * R + j * R + k] == '1';
         if (model[i][j][k]) {
           max_y = max(max_y, j);
+          if (j == 0) {
+            par[id(i, j, k)] = -1;
+          }
         }
       }
     }
@@ -292,26 +305,43 @@ void write_binary(string cmd) {
   write_binary(s, cmd);
 }
 
+int find(int x) {
+  if (par[x] == -1) return -1;
+  if (par[x] == x) return x;
+  return par[x] = find(par[x]);
+}
+
+void unite(int x, int y) {
+  x = find(x);
+  y = find(y);
+  if (x != y) {
+    if (x == -1) par[y] = -1;
+    if (y == -1) par[x] = -1;
+    par[x] = y;
+  }
+}
+
 bool ungrounded(int x, int y, int z) {
   if (y == 0) return false;
-  queue<VI> q;
-  q.push({x, y, z});
   VI d[6] = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
-  VVVI visited = VVVI(R, VVI(R, VI(R)));
-  visited[x][y][z] = 1;
-  while (!q.empty()) {
-    VI c = q.front();
-    q.pop();
-    for (int i = 0; i < 6; i++) {
-      int nx = c[0] + d[i][0];
-      int ny = c[1] + d[i][1];
-      int nz = c[2] + d[i][2];
-      if (!visited[nx][ny][nz] && model[nx][ny][nz] == 2) {
-        if (ny == 0) return false;
-        q.push({nx, ny, nz});
-        visited[nx][ny][nz] = 1;
-      }
+  for (int i = 0; i < 6; i++) {
+    int nx = x + d[i][0];
+    int ny = y + d[i][1];
+    int nz = z + d[i][2];
+    if (model[nx][ny][nz] == 2) {
+      unite(id(x, y, z), id(nx, ny, nz));
     }
   }
+  if (find(id(x, y, z)) == -1) {
+    if (floats.size()) {
+      for (int i: floats) {
+        find(i);
+      }
+      floats.clear();
+    }
+    return false;
+  }
+
+  floats.push_back(id(x, y, z));
   return true;
 }
