@@ -176,7 +176,27 @@ string lmove_s(VI v1, VI v2) {
 }
 
 string move_from_to(int fid, int tid) {
-  return "to be implemented";
+  // assume there is no obstacle
+  if (fid == tid) return "";
+  VI f = xyz(fid);
+  VI t = xyz(tid);
+  int dx, dy, dz;
+  dx = t[0] - f[0];
+  dy = t[1] - f[1];
+  dz = t[2] - f[2];
+  if ((dx == 0 && dy == 0) && (dy == 0 && dz == 0) && (dz == 0 && dx == 0)) {
+    return smove_s({dx, dy, dz});
+  }
+  // うち1つは0だと仮定
+  assert(dx == 0 || dy == 0 || dz == 0);
+  int fdx = 0, fdy = 0, fdz = 0;
+  if (dx > 5) fdx = dx - 5;
+  if (dy > 5) fdy = dy - 5;
+  if (dz > 5) fdy = dz - 5;
+  if (dx < -5) fdx = dx + 5;
+  if (dy < -5) fdy = dy + 5;
+  if (dz < -5) fdy = dz + 5;
+  return "";
 }
 
 string fusionp_s(VI v) {
@@ -330,7 +350,7 @@ void write_binary(string cmd) {
 }
 
 vector<string> solve2D(int node) {
-  
+  return {""};
 }
 
 bool emptyAll() {

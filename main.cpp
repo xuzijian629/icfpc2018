@@ -13,8 +13,11 @@ int main() {
     }
     cmd += move_from_to(pillar[i - 1], pillar[i]);
     for (int j = 0; j < i; j++) {
-      // １回だけ塗るように変更する
-      cmd += fill_s({-1, 0, 0});
+      if (j == i - 1) {
+        cmd += fill_s({-1, 0, 0});
+      } else {
+        cmd += wait_s();
+      }
     }
   }
   node_cmd[1].push(smove_s({0, 1, 0}));
