@@ -11,6 +11,8 @@ MDLS = $(widlcard ./mdl/*.mdl)
 
 default:$(TARGET)
 
+deconstruct:deconstruct
+
 check:check_connected
 	./check_connected.sh
 
