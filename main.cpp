@@ -5,8 +5,9 @@ bool is_high = false;
 
 int main() {
   assert_commands();
+  read_binary();
   // read_binary("tmp.mdl");
-  read_binary("mdl/FD120_src.mdl");
+  // read_binary("mdl/FD120_src.mdl");
 
   VI curpos = {0, max_y + 1, 0};
   for (int y = max_y; y >= 0; y--) {
@@ -123,5 +124,6 @@ int main() {
   }
   cmd += halt_s();
 
-  write_binary("tmp.nbt", cmd);
+  write_binary(cmd);
+  // write_binary("tmp.nbt", cmd);
 }
