@@ -6,7 +6,13 @@ using VVVI = vector<VVI>;
 
 int R;
 VVVI model;
-int cnt = 0;
+VI query;
+VI query_ans;
+VI par;
+
+int id(int x, int y, int z) {
+  return x * R * R + y * R + z;
+}
 
 void print2D(int y) {
   cout << "y: " << y << endl;
@@ -92,36 +98,36 @@ string move_from_to(int dx, int dy, int dz) {
   if (!(dx || dy || dz)) return "";
   int fdx = 0, fdy = 0, fdz = 0;
   if (dx > 15) {
-    dx = 15;
     fdx = dx - 15;
+    dx = 15;
   }
   if (dx < -15) {
-    dx = -15;
     fdx = dx + 15;
+    dx = -15;
   }
   if (dx) {
     return smove_s({dx, 0, 0}) + move_from_to(fdx, dy, dz);
   }
 
   if (dy > 15) {
-    dy = 15;
     fdy = dy - 15;
+    dy = 15;
   }
   if (dy < -15) {
-    dy = -15;
     fdy = dy + 15;
+    dy = -15;
   }
   if (dy) {
     return smove_s({0, dy, 0}) + move_from_to(dx, fdy, dz);
   }
 
   if (dz > 15) {
-    dz = 15;
     fdz = dz - 15;
+    dz = 15;
   }
   if (dz < -15) {
-    dz = -15;
     fdz = dz + 15;
+    dz = -15;
   }
   if (dz) {
     return smove_s({0, 0, dz}) + move_from_to(dx, dy, fdz);
@@ -225,6 +231,10 @@ void read_binary(string s) {
   uint8_t r;
   fread(&r, sizeof(uint8_t), 1, fp);
   R = int(r);
+  par = VI(R * R * R);
+  for (int i = 0; i < R * R * R; i++) {
+    par[i] = i;
+  }
   model = VVVI(R, VVI(R, VI(R)));
   string bin = "";
   uint8_t c[2000000];
@@ -247,7 +257,9 @@ void read_binary(string s) {
         model[i][j][k] = bin[i * R * R + j * R + k] == '1';
         if (model[i][j][k]) {
           max_y = max(max_y, j);
-          cnt++;
+          if (j == 0) {
+            par[id(i, j, k)] = -1;
+          }
         }
       }
     }
@@ -294,6 +306,28 @@ void write_binary(string cmd) {
   write_binary(s, cmd);
 }
 
+int find(int x) {
+  if (par[x] == -1) return -1;
+  if (par[x] == x) return x;
+  return par[x] = find(par[x]);
+}
+
+void unite(int x, int y) {
+  x = find(x);
+  y = find(y);
+  if (x != y) {
+    if (x == -1) {
+      par[y] = -1;
+      return;
+    }
+    if (y == -1) {
+      par[x] = -1;
+      return;
+    }
+    par[x] = y;
+  }
+}
+
 bool ungrounded(int x, int y, int z) {
   if (y == 0) return false;
   queue<VI> q;
@@ -318,39 +352,6 @@ bool ungrounded(int x, int y, int z) {
   return true;
 }
 
-bool valid_coords(int x, int y, int z) {
-  return 0 < x && x < R && 0 <= y && y < R && 0 < z && z < R;
-}
+void solve_query() {
 
-bool can_void(int x, int y, int z) {
-  VI dp[4] = {{0, 0, 1}, {0, 0, -1}, {1, 0, 0}, {-1, 0, 0}};
-  VI d[6] = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
-  int dir = -1;
-  for (int i = 0; i < 4; i++) {
-    if (model[x + dp[i][0]][y + dp[i][1]][z + dp[i][2]]) {
-      dir = i;
-      break;
-    }
-  }
-  if (dir == -1) return true;
-  queue<VI> q;
-  q.push({x + dp[dir][0], y + dp[dir][1], z + dp[dir][2]});
-  VVVI visited = VVVI(R, VVI(R, VI(R)));
-  visited[x + dp[dir][0]][y + dp[dir][1]][z + dp[dir][2]] = 1;
-  int v = 1;
-  while (!q.empty()) {
-    VI c = q.front();
-    q.pop();
-    for (int i = 0; i < 6; i++) {
-      int nx = c[0] + d[i][0];
-      int ny = c[1] + d[i][1];
-      int nz = c[2] + d[i][2];
-      if (valid_coords(nx, ny, nz) && !visited[nx][ny][nz] && model[nx][ny][nz] == 1) {
-        q.push({nx, ny, nz});
-        v++;
-        visited[nx][ny][nz] = 1;
-      }
-    }
-  }
-  return cnt == v;
 }
