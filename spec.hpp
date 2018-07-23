@@ -289,8 +289,8 @@ void write_binary(string s, string cmd) {
     exit(1);
   }
   assert(cmd.size() % 8 == 0);
-  uint8_t c[20000000];
-  assert(cmd.size() / 8 < 20000000);
+  uint8_t c[32000000];
+  assert(cmd.size() / 8 < 32000000);
   for (int i = 0; i < cmd.size(); i+=8) {
     uint8_t e = 0;
     e += 128 * (cmd[i] == '1');
