@@ -9,9 +9,17 @@ VVVI model;
 VI query;
 VI query_ans;
 VI par;
+VI floats;
 
 int id(int x, int y, int z) {
   return x * R * R + y * R + z;
+}
+
+VI dec(int i) {
+  int x = i / (R * R);
+  int y = (i % (R * R)) / R;
+  int z = i % R;
+  return {x, y, z};
 }
 
 void print2D(int y) {
@@ -257,9 +265,6 @@ void read_binary(string s) {
         model[i][j][k] = bin[i * R * R + j * R + k] == '1';
         if (model[i][j][k]) {
           max_y = max(max_y, j);
-          if (j == 0) {
-            par[id(i, j, k)] = -1;
-          }
         }
       }
     }
@@ -353,5 +358,42 @@ bool ungrounded(int x, int y, int z) {
 }
 
 void solve_query() {
+  int n = query.size();
+  query_ans = VI(n);
+  VI d[6] = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
+  VI visited(R * R * R);
+  for (int i = n - 1; i >= 0; i--) {
+    int v = query[i];
+    visited[v] = true;
+    VI c = dec(v);
+    if (c[1] == 0) {
+      query_ans[i] = true;
+      par[v] = -1;
+      continue;
+    }
 
+    for (int j = 0; j < 6; j++) {
+      int nx = c[0] + d[j][0];
+      int ny = c[1] + d[j][1];
+      int nz = c[2] + d[j][2];
+      if (visited[id(nx, ny, nz)]) {
+        unite(v, id(nx, ny, nz));
+      }
+    }
+    if (find(v) == -1) {
+      if (floats.size()) {
+        query_ans[i] = false;
+        for (int i: floats) {
+          find(i);
+        }
+        floats.clear();
+        continue;
+      }
+      query_ans[i] = true;
+      continue;
+    }
+
+    floats.push_back(v);
+    query_ans[i] = false;
+  }
 }
