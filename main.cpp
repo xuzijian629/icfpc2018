@@ -24,8 +24,6 @@ int main(int argc, char *argv[]) {
         }
       }
     }
-    cmd += move_from_to(curpos, {min_x, y + 1, min_z});
-    curpos = {min_x, y + 1, min_z};
     VI startpos = {min_x, y + 1, min_z};
     int xoff = 0;
     int zoff = 0;
@@ -35,6 +33,7 @@ int main(int argc, char *argv[]) {
       if (model[startpos[0] + xoff][y][startpos[2] + zoff]) {
         cmd += long_move_s(curpos[0], startpos[0] + xoff, x_axis);
         cmd += long_move_s(curpos[2], startpos[2] + zoff, z_axis);
+        cmd += long_move_s(curpos[1], y + 1, y_axis);
         curpos = {startpos[0] + xoff, y + 1, startpos[2] + zoff};
         bool u = ungrounded(startpos[0] + xoff, y, startpos[2] + zoff);
         if (!is_high && u) {
