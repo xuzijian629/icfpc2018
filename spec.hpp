@@ -6,6 +6,7 @@ using VVVI = vector<VVI>;
 
 int R;
 VVVI model;
+int cnt = 0;
 
 void print2D(int y) {
   cout << "y: " << y << endl;
@@ -246,6 +247,7 @@ void read_binary(string s) {
         model[i][j][k] = bin[i * R * R + j * R + k] == '1';
         if (model[i][j][k]) {
           max_y = max(max_y, j);
+          cnt++;
         }
       }
     }
@@ -314,4 +316,41 @@ bool ungrounded(int x, int y, int z) {
     }
   }
   return true;
+}
+
+bool valid_coords(int x, int y, int z) {
+  return 0 < x && x < R && 0 <= y && y < R && 0 < z && z < R;
+}
+
+bool can_void(int x, int y, int z) {
+  VI dp[4] = {{0, 0, 1}, {0, 0, -1}, {1, 0, 0}, {-1, 0, 0}};
+  VI d[6] = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
+  int dir = -1;
+  for (int i = 0; i < 4; i++) {
+    if (model[x + dp[i][0]][y + dp[i][1]][z + dp[i][2]]) {
+      dir = i;
+      break;
+    }
+  }
+  if (dir == -1) return true;
+  queue<VI> q;
+  q.push({x + dp[dir][0], y + dp[dir][1], z + dp[dir][2]});
+  VVVI visited = VVVI(R, VVI(R, VI(R)));
+  visited[x + dp[dir][0]][y + dp[dir][1]][z + dp[dir][2]] = 1;
+  int v = 1;
+  while (!q.empty()) {
+    VI c = q.front();
+    q.pop();
+    for (int i = 0; i < 6; i++) {
+      int nx = c[0] + d[i][0];
+      int ny = c[1] + d[i][1];
+      int nz = c[2] + d[i][2];
+      if (valid_coords(nx, ny, nz) && !visited[nx][ny][nz] && model[nx][ny][nz] == 1) {
+        q.push({nx, ny, nz});
+        v++;
+        visited[nx][ny][nz] = 1;
+      }
+    }
+  }
+  return cnt == v;
 }

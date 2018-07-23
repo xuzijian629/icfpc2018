@@ -7,16 +7,6 @@ int main() {
   assert_commands();
   read_binary("tmp.mdl");
 
-  for (int i = 0; i < R; i++) {
-    for (int j = 0; j < R; j++) {
-      for (int k = 0; k < R; k++) {
-        if (model[i][j][k]) {
-          model[i][j][k] = 2;
-        }
-      }
-    }
-  }
-
   cmd += move_from_to({0, 0, 0}, {0, max_y + 1, 0});
   VI curpos = {0, max_y + 1, 0};
   for (int y = max_y; y >= 0; y--) {
@@ -40,7 +30,24 @@ int main() {
     int zoff_max = max_z - min_z;
     while (zoff <= zoff_max) {
       if (model[startpos[0] + xoff][y][startpos[2] + zoff]) {
-        cmd += void_s({0, -1, 0});
+        model[startpos[0] + xoff][y][startpos[2] + zoff] = 0;
+        cnt--;
+        if (!is_high && can_void(startpos[0] + xoff, y, startpos[2] + zoff)) {
+          cmd += void_s({0, -1, 0});
+        }
+        if (!is_high && !can_void(startpos[0] + xoff, y, startpos[2] + zoff)) {
+          cmd += flip_s();
+          cmd += void_s({0, -1, 0});
+          is_high = true;
+        }
+        if (is_high && can_void(startpos[0] + xoff, y, startpos[2] + zoff)) {
+          cmd += void_s({0, -1, 0});
+          cmd += flip_s();
+          is_high = false;
+        }
+        if (is_high && !can_void(startpos[0] + xoff, y, startpos[2] + zoff)) {
+          cmd += void_s({0, -1, 0});
+        }
       }
       if (zoff % 2 == 0) {
         if (xoff < xoff_max) {
