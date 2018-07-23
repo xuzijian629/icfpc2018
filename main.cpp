@@ -7,8 +7,19 @@ int main() {
   assert_commands();
   read_binary("tmp.mdl");
 
-  VI curpos = {0, 0, 0};
-  for (int y = 0; y <= max_y; y++) {
+  for (int i = 0; i < R; i++) {
+    for (int j = 0; j < R; j++) {
+      for (int k = 0; k < R; k++) {
+        if (model[i][j][k]) {
+          model[i][j][k] = 2;
+        }
+      }
+    }
+  }
+
+  cmd += move_from_to({0, 0, 0}, {0, max_y + 1, 0});
+  VI curpos = {0, max_y + 1, 0};
+  for (int y = max_y; y >= 0; y--) {
     int min_x = 1000, min_z = 1000;
     int max_x = -1, max_z = -1;
     for (int i = 0; i < R; i++) {
@@ -29,26 +40,7 @@ int main() {
     int zoff_max = max_z - min_z;
     while (zoff <= zoff_max) {
       if (model[startpos[0] + xoff][y][startpos[2] + zoff]) {
-        if (!is_high && ungrounded(startpos[0] + xoff, y, startpos[2] + zoff)) {
-          cmd += flip_s();
-          cmd += fill_s({0, -1, 0});
-          model[startpos[0] + xoff][y][startpos[2] + zoff] = 2;
-          is_high = true;
-        }
-        if (is_high && ungrounded(startpos[0] + xoff, y, startpos[2] + zoff)) {
-          cmd += fill_s({0, -1, 0});
-          model[startpos[0] + xoff][y][startpos[2] + zoff] = 2;
-        }
-        if (is_high && !ungrounded(startpos[0] + xoff, y, startpos[2] + zoff)) {
-          cmd += fill_s({0, -1, 0});
-          cmd += flip_s();
-          model[startpos[0] + xoff][y][startpos[2] + zoff] = 2;
-          is_high = false;
-        }
-        if (!is_high && !ungrounded(startpos[0] + xoff, y, startpos[2] + zoff)) {
-          cmd += fill_s({0, -1, 0});
-          model[startpos[0] + xoff][y][startpos[2] + zoff] = 2;
-        }
+        cmd += void_s({0, -1, 0});
       }
       if (zoff % 2 == 0) {
         if (xoff < xoff_max) {
@@ -68,12 +60,12 @@ int main() {
         }
       }
     }
-    if (y == max_y) {
+    if (y == 0) {
       cmd += move_from_to({startpos[0] + xoff, y + 1, startpos[2] + zoff}, {0, 0, 0});
       break;
-    };
-    cmd += smove_s({0, 1, 0});
-    curpos = {startpos[0] + xoff, y + 2, startpos[2] + zoff};
+    }
+    cmd += smove_s({0, -1, 0});
+    curpos = {startpos[0] + xoff, y, startpos[2] + zoff};
   }
   cmd += halt_s();
 
