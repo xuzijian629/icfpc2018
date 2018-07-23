@@ -358,3 +358,19 @@ bool ungrounded(int x, int y, int z) {
   assert (floats >= 0);
   return floats != 0;
 }
+
+enum Axis { x_axis, y_axis, z_axis };
+string long_move_s(int from, int to, Axis ax) {
+  string ans = "";
+  while (from != to) {
+    int dist = max(-15, min(15, to - from));
+    switch(ax) {
+      case x_axis: ans += smove_s({dist, 0, 0}); break;
+      case y_axis: ans += smove_s({0, dist, 0}); break;
+      case z_axis: ans += smove_s({0, 0, dist}); break;
+    }
+    from += dist;
+  }
+  return ans;
+}
+struct voxel { int x, y, z; };
