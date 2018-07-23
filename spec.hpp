@@ -83,6 +83,60 @@ string lmove_s(VI v1, VI v2) {
   return ret;
 }
 
+bool is_origin(VI v) {
+  return !(v[0] || v[1] || v[2]);
+}
+
+string move_from_to(int dx, int dy, int dz) {
+  if (!(dx || dy || dz)) return "";
+  int fdx = 0, fdy = 0, fdz = 0;
+  if (dx > 15) {
+    dx = 15;
+    fdx = dx - 15;
+  }
+  if (dx < -15) {
+    dx = -15;
+    fdx = dx + 15;
+  }
+  if (dx) {
+    return smove_s({dx, 0, 0}) + move_from_to(fdx, dy, dz);
+  }
+
+  if (dy > 15) {
+    dy = 15;
+    fdy = dy - 15;
+  }
+  if (dy < -15) {
+    dy = -15;
+    fdy = dy + 15;
+  }
+  if (dy) {
+    return smove_s({0, dy, 0}) + move_from_to(dx, fdy, dz);
+  }
+
+  if (dz > 15) {
+    dz = 15;
+    fdz = dz - 15;
+  }
+  if (dz < -15) {
+    dz = -15;
+    fdz = dz + 15;
+  }
+  if (dz) {
+    return smove_s({0, 0, dz}) + move_from_to(dx, dy, fdz);
+  }
+
+  exit(1);
+}
+
+string move_from_to(VI curpos, VI nxtpos) {
+  VI d(3);
+  for (int i = 0; i < 3; i++) {
+    d[i] = nxtpos[i] - curpos[i];
+  }
+  return move_from_to(d[0], d[1], d[2]);
+}
+
 string fusionp_s(VI v) {
   int dist = (v[0] + 1) * 9 + (v[1] + 1) * 3 + (v[2] + 1);
   string len = "";
@@ -158,10 +212,9 @@ void assert_commands() {
   assert(void_s({1,0,1}) == "10111010");
 }
 
-void read_binary() {
-  cout << "Model file name?" << endl;
-  string s;
-  cin >> s;
+int max_y;
+
+void read_binary(string s) {
   FILE *fp;
   if ((fp = fopen(s.c_str(), "rb")) == NULL) {
     cerr << "Failed to open file" << endl;
@@ -191,16 +244,23 @@ void read_binary() {
     for (int j = 0; j < R; j++) {
       for (int k = 0; k < R; k++) {
         model[i][j][k] = bin[i * R * R + j * R + k] == '1';
+        if (model[i][j][k]) {
+          max_y = max(max_y, j);
+        }
       }
     }
   }
   cout << "Model successfully imported" << endl;
 }
 
-void write_binary(string cmd) {
-  cout << "Trace file name?" << endl;
+void read_binary() {
+  cout << "Model file name?" << endl;
   string s;
   cin >> s;
+  read_binary(s);
+}
+
+void write_binary(string s, string cmd) {
   FILE *fp;
   if ((fp = fopen(s.c_str(), "wb")) == NULL) {
     cerr << "Failed to open file" << endl;
@@ -223,4 +283,35 @@ void write_binary(string cmd) {
   }
   fwrite(c, sizeof(uint8_t), cmd.size() / 8, fp);
   fclose(fp);
+}
+
+void write_binary(string cmd) {
+  cout << "Trace file name?" << endl;
+  string s;
+  cin >> s;
+  write_binary(s, cmd);
+}
+
+bool ungrounded(int x, int y, int z) {
+  if (y == 0) return false;
+  queue<VI> q;
+  q.push({x, y, z});
+  VI d[6] = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
+  VVVI visited = VVVI(R, VVI(R, VI(R)));
+  visited[x][y][z] = 1;
+  while (!q.empty()) {
+    VI c = q.front();
+    q.pop();
+    for (int i = 0; i < 6; i++) {
+      int nx = c[0] + d[i][0];
+      int ny = c[1] + d[i][1];
+      int nz = c[2] + d[i][2];
+      if (!visited[nx][ny][nz] && model[nx][ny][nz] == 2) {
+        if (ny == 0) return false;
+        q.push({nx, ny, nz});
+        visited[nx][ny][nz] = 1;
+      }
+    }
+  }
+  return true;
 }
