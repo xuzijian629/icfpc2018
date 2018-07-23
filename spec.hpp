@@ -6,6 +6,10 @@ using VVVI = vector<VVI>;
 
 int R;
 VVVI model;
+int nodes;
+queue<string> node_cmd[40];
+int nodepos[40];
+string cmd = "";
 
 void print2D(int y) {
   cout << "y: " << y << endl;
@@ -106,6 +110,7 @@ VI get_pillar() {
     z = c[2];
   }
 
+  reverse(ret.begin(), ret.end());
   return ret;
 }
 
@@ -168,6 +173,10 @@ string lmove_s(VI v1, VI v2) {
   len2 += '0' + (dist2 & 1);
   string ret = dir2 + dir1 + "1100" + len2 + len1;
   return ret;
+}
+
+string move_from_to(int fid, int tid) {
+  return "to be implemented";
 }
 
 string fusionp_s(VI v) {
@@ -288,10 +297,7 @@ void read_binary() {
   read_binary(s);
 }
 
-void write_binary(string cmd) {
-  cout << "Trace file name?" << endl;
-  string s;
-  cin >> s;
+void write_binary(string s, string cmd) {
   FILE *fp;
   if ((fp = fopen(s.c_str(), "wb")) == NULL) {
     cerr << "Failed to open file" << endl;
@@ -314,4 +320,35 @@ void write_binary(string cmd) {
   }
   fwrite(c, sizeof(uint8_t), cmd.size() / 8, fp);
   fclose(fp);
+}
+
+void write_binary(string cmd) {
+  cout << "Trace file name?" << endl;
+  string s;
+  cin >> s;
+  write_binary(s, cmd);
+}
+
+vector<string> solve2D(int node) {
+  
+}
+
+bool emptyAll() {
+  for (int i = 0; i < 40; i++) {
+    if (!node_cmd[i].empty()) return false;
+  }
+  return true;
+}
+
+string gather_cmd() {
+  string ret = "";
+  for (int i = 1; i <= nodes; i++) {
+    if (!node_cmd[i].empty()) {
+      ret += node_cmd[i].front();
+      node_cmd[i].pop();
+    } else {
+      ret += wait_s();
+    }
+  }
+  return ret;
 }
