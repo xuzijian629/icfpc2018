@@ -6,11 +6,20 @@ using VVVI = vector<VVI>;
 
 int R;
 VVVI model;
+VI query;
+VI query_ans;
 VI par;
 int floats;
 
 int id(int x, int y, int z) {
   return x * R * R + y * R + z;
+}
+
+VI dec(int i) {
+  int x = i / (R * R);
+  int y = (i % (R * R)) / R;
+  int z = i % R;
+  return {x, y, z};
 }
 
 void print2D(int y) {
@@ -280,8 +289,8 @@ void write_binary(string s, string cmd) {
     exit(1);
   }
   assert(cmd.size() % 8 == 0);
-  uint8_t c[2000000];
-  assert(cmd.size() / 8 < 2000000);
+  uint8_t c[20000000];
+  assert(cmd.size() / 8 < 20000000);
   for (int i = 0; i < cmd.size(); i+=8) {
     uint8_t e = 0;
     e += 128 * (cmd[i] == '1');
@@ -357,4 +366,43 @@ bool ungrounded(int x, int y, int z) {
 
   assert (floats >= 0);
   return floats != 0;
+}
+
+void solve_query() {
+  int n = query.size();
+  query_ans = VI(n);
+  VI d[6] = {{0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}, {1, 0, 0}, {-1, 0, 0}};
+  VI visited(R * R * R);
+  for (int i = n - 1; i >= 0; i--) {
+    int v = query[i];
+    visited[v] = true;
+    VI c = dec(v);
+    if (c[1] == 0) {
+      query_ans[i] = true;
+      par[v] = -1;
+      continue;
+    }
+
+    map<int, int> parv;
+    for (int j = 0; j < 6; j++) {
+      int nx = c[0] + d[j][0];
+      int ny = c[1] + d[j][1];
+      int nz = c[2] + d[j][2];
+      if (visited[id(nx, ny, nz)]) {
+        parv[par[id(nx, ny, nz)]]++;
+      }
+    }
+    if (parv.size() == 0) {
+      query_ans[i] = floats == 0;
+      floats++;
+      continue;
+    }
+
+    query_ans[i] = floats == 0;
+    int front = (*parv.begin()).first;
+    par[v] = front;
+    for (auto p: parv) {
+      unite(p.first, front);
+    }
+  }
 }
